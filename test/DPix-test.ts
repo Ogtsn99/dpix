@@ -7,12 +7,12 @@ import {BigNumber} from '@ethersproject/bignumber';
 import { SignerWithAddress } from "hardhat-deploy-ethers/dist/src/signers";
 
 describe("DPix", function () {
-	let deployer:Signer, author:Signer, tipper: Signer;
+	let deployer:Signer, author:Signer, author2: Signer, tipper: Signer;
 	let deployerAddress, authorAddress, tipperAddress;
 	let dpix;
 	
 	before(async() => {
-		[deployer, author, tipper] = await ethers.getSigners();
+		[deployer, author, author2, tipper] = await ethers.getSigners();
 		deployerAddress = await deployer.getAddress();
 		authorAddress = await author.getAddress();
 		tipperAddress = await tipper.getAddress();
@@ -42,19 +42,33 @@ describe("DPix", function () {
 	})
 	
 	describe('pictures', async()=> {
-		
 		const hash = "hash123";
 		const title = "this is title";
 		
 		it('can add new picture', async () => {
-			await dpix.connect(author).addPicture(hash, title, {gasPrice: 0});
 			let pictureCount = await dpix.pictureCount();
+			assert.equal(pictureCount.toNumber(), 0);
+			await dpix.connect(author).addPicture(hash, title, {gasPrice: 0});
+			pictureCount = await dpix.pictureCount();
 			assert.equal(pictureCount.toNumber(), 1);
 			let addedPicture = await dpix.pictures(0);
 			assert.equal(addedPicture.id.toNumber(), 0);
 			assert.equal(addedPicture.hash, hash);
 			assert.equal(addedPicture.title, title);
 			assert.equal(addedPicture.author, authorAddress);
+		})
+		
+		it("should throw when a user try uploading a picture whose hash already exists", async ()=> {
+			let error = null;
+			
+			try {
+				await dpix.connect(author2).addPicture(hash, title, {gasPrice: 0});
+			} catch (err) {
+				error = err;
+			}
+			
+			assert.isNotNull(error, "You're uploading file already exists");
+			expect(error).to.be.an(`Error`);
 		})
 		
 		it('allows users to tip pictures', async ()=> {
