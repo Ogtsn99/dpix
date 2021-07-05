@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { DPixContext } from "../hardhat/SymfoniContext";
 import ipfsClient from 'ipfs-http-client';
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 interface Props { }
 const ipfs = ipfsClient.create({host: 'ipfs.infura.io', port: 5001, protocol: 'https'})
-console.log(ipfs.key.gen("Yes-Key"))
 
 export const DPix: React.FC<Props> = () => {
 	const dpix = useContext(DPixContext)
@@ -47,6 +46,7 @@ export const DPix: React.FC<Props> = () => {
 		const doAsync = async () => {
 			if (!dpix.instance) return
 			console.log("DPix is deployed at ", dpix.instance.address)
+			console.log(await dpix.instance.name())
 			setName(await dpix.instance.name())
 			let pictureCount = (await dpix.instance.pictureCount()).toNumber();
 			let array = [];

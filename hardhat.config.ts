@@ -6,6 +6,9 @@ import "hardhat-deploy";
 import "@symfoni/hardhat-react";
 import "hardhat-typechain";
 import "@typechain/ethers-v5";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 task("accounts", "Prints the list of accounts", async (args, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -29,22 +32,17 @@ const config: HardhatUserConfig = {
       inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
       accounts: {
         mnemonic: "test test test test test test test test test test test junk", // test test test test test test test test test test test junk
-      },
+      }
     },
-    // hardhat: {
-    //   accounts: [
-    //     {
-    //       balance: "10000000000000000000000",
-    //       privateKey:
-    //         "0xe87d780e4c31c953a68aef2763df56599c9cfe73df4740fc24c2d0f5acd21bae",
-    //     },
-    //   ],
-    // },
+    ropsten: {
+      url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [`0x${process.env.ROPSTEN_PRIVATE_KEY}`]
+    }
   },
   solidity: {
     compilers: [
       {
-        version: "0.7.3",
+        version: "0.8.0",
         settings: {
           optimizer: {
             enabled: true,
@@ -53,6 +51,7 @@ const config: HardhatUserConfig = {
         },
       },
     ],
-  },
+  }
 };
+
 export default config;
