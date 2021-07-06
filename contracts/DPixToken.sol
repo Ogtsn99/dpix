@@ -8,7 +8,7 @@ contract DPixToken is ERC20 {
         string memory name,
         string memory symbol,
         uint256 initialSupply
-    ) public ERC20(name, symbol) {
+    ) ERC20(name, symbol) {
         _mint(msg.sender, initialSupply);
     }
 }

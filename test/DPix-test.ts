@@ -4,13 +4,11 @@ import { Signer } from "ethers";
 import { assert, expect } from "chai";
 import {BigNumber} from '@ethersproject/bignumber';
 
-//import type {DPix} from "../frontend/src/hardhat/typechain";
-import { SignerWithAddress } from "hardhat-deploy-ethers/dist/src/signers";
-
 describe("DPix", function () {
 	let deployer:Signer, author:Signer, author2: Signer, tipper: Signer;
 	let deployerAddress, authorAddress, tipperAddress;
 	let dpix;
+	let dpixToken;
 	
 	before(async() => {
 		[deployer, author, author2, tipper] = await ethers.getSigners();
@@ -18,9 +16,12 @@ describe("DPix", function () {
 		authorAddress = await author.getAddress();
 		tipperAddress = await tipper.getAddress();
 		
+		const DPixToken = await ethers.getContractFactory("DPixToken", deployer);
+		dpixToken = await DPixToken.deploy("DPixToken", "DPXT", "10000000000000000000000");
 		const DPix = await ethers.getContractFactory("DPix", deployer);
-		
-		dpix = await DPix.deploy();
+		console.log("Token address ", dpixToken.address)
+		dpix = await DPix.deploy(dpixToken.address);
+		await dpixToken.connect(deployer).transfer(tipperAddress, "1000");
 	})
 	
 	describe('development', async() => {
@@ -39,6 +40,10 @@ describe("DPix", function () {
 		it('initially pictureCount is 0', async () => {
 			let pictureCount = await dpix.pictureCount();
 			assert.equal(pictureCount.toNumber(), 0);
+		})
+		
+		it('initially the tipper has 1000 DPXT', async () => {
+			assert.equal((await dpixToken.balanceOf(tipperAddress)).toString(), "1000");
 		})
 	})
 	
@@ -95,6 +100,21 @@ describe("DPix", function () {
 			}
 			assert.isNotNull(error, "You're tipping to a picture not exist");
 			expect(error).to.be.an(`Error`);
+		})
+		
+		it('allows users to tip pictures by DPXT', async ()=> {
+			let oldAuthorBalance: BigNumber = await dpixToken.balanceOf(authorAddress);
+			let oldTipperBalance: BigNumber = await dpixToken.balanceOf(tipperAddress);
+			
+			await dpixToken.connect(tipper).approve(dpix.address, "893", {gasPrice: 0});
+			assert.equal((await dpixToken.allowance(tipperAddress, dpix.address)), "893");
+			await dpix.connect(tipper).tipPictureOwnerByDPixToken(0, "893", {gasPrice: 0});
+			
+			let newAuthorBalance: BigNumber = await dpixToken.balanceOf(authorAddress);
+			let newTipperBalance: BigNumber = await dpixToken.balanceOf(tipperAddress);
+			
+			assert.equal(newAuthorBalance.toString(), oldAuthorBalance.add("893").toString());
+			assert.equal(newTipperBalance.toString(), oldTipperBalance.sub("893").toString());
 		})
 	})
 	

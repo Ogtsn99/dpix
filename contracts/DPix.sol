@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "./DPixToken.sol";
 
 contract DPix {
     address owner;
@@ -9,6 +10,7 @@ contract DPix {
     string public name = "DPix";
     mapping(uint => Picture) public pictures;
     mapping(string => address) public hashAuthorMap;
+    DPixToken public dpixToken;
 
     struct Picture {
         uint id;
@@ -17,8 +19,8 @@ contract DPix {
         address payable author;
     }
 
-    constructor() public {
-        console.log("deploy", msg.sender);
+    constructor(address _tokenAddress) {
+        dpixToken = DPixToken(_tokenAddress);
         owner = msg.sender;
     }
 
@@ -32,7 +34,7 @@ contract DPix {
         require(bytes(_hash).length > 0);
         require(bytes(_title).length > 0);
         require(msg.sender != address(0));
-        Picture memory newPicture = Picture(pictureCount, _hash, _title, msg.sender);
+        Picture memory newPicture = Picture(pictureCount, _hash, _title, payable(msg.sender));
         pictures[pictureCount] = newPicture;
         hashAuthorMap[_hash] = msg.sender;
         pictureCount++;
@@ -41,5 +43,14 @@ contract DPix {
     function tipPictureOwner(uint _id) public payable {
         require(0 <= _id && pictureCount > _id);
         pictures[_id].author.transfer(msg.value);
+    }
+
+    function tipPictureOwnerByDPixToken(uint _id, uint _value) public {
+        require(0 <= _id && pictureCount > _id);
+        console.log("balance:", dpixToken.balanceOf(msg.sender));
+        console.log("send:", _value);
+        console.log("allowance", dpixToken.allowance(msg.sender, pictures[_id].author));
+        bool result = dpixToken.transferFrom(msg.sender, pictures[_id].author, _value);
+        console.log(result);
     }
 }

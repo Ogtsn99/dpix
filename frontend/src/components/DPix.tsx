@@ -1,16 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DPixContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, CurrentAddressContext } from "../hardhat/SymfoniContext";
 import ipfsClient from 'ipfs-http-client';
 import { ethers } from "ethers";
 interface Props { }
 const ipfs = ipfsClient.create({host: 'ipfs.infura.io', port: 5001, protocol: 'https'})
+const exifremove = require('exifremove');
+const arrayBufferToBuffer = require('arraybuffer-to-buffer');
 
 export const DPix: React.FC<Props> = () => {
-	const dpix = useContext(DPixContext)
+	const dpix = useContext(DPixContext);
+	const dpixToken = useContext(DPixTokenContext);
 	const [name, setName] = useState("");
+	const [balance, setBalance] = useState("0");
 	const [buffer, setBuffer] = useState<string | ArrayBuffer | null>(null);
 	const [title, setTitle] = useState("");
 	const [pictures, setPictures] = useState<any>([]);
+	const [currentAddress, setCurrentAddress] = useContext(CurrentAddressContext)
 	
 	const captureFile = (event: any) => {
 		event.preventDefault();
@@ -18,8 +23,14 @@ export const DPix: React.FC<Props> = () => {
 		const file = event.target.files[0];
 		const reader = new window.FileReader();
 		reader.readAsArrayBuffer(file);
+		
 		reader.onloadend = () => {
-			setBuffer(reader.result);
+			let buffer = reader.result;
+			try { // remove Exif, if the file is jpeg.
+				buffer = exifremove.remove(arrayBufferToBuffer(reader.result));
+			} finally {
+				setBuffer(buffer);
+			}
 		}
 	}
 	
@@ -48,6 +59,10 @@ export const DPix: React.FC<Props> = () => {
 			console.log("DPix is deployed at ", dpix.instance.address)
 			console.log(await dpix.instance.name())
 			setName(await dpix.instance.name())
+			console.log(currentAddress)
+			if(dpixToken.instance)
+			setBalance((await dpixToken.instance?.balanceOf(currentAddress)).toString())
+			console.log(balance)
 			let pictureCount = (await dpix.instance.pictureCount()).toNumber();
 			let array = [];
 			for (let i = 0; i < pictureCount; i++) {
@@ -58,11 +73,12 @@ export const DPix: React.FC<Props> = () => {
 			console.log(pictureCount, pictures)
 		};
 		doAsync();
-	}, [dpix])
+	}, [currentAddress])
 	
 	return (
 		<div>
 			<p>{name}</p>
+			<p>DPXT: {balance}</p>
 			<form onSubmit={(event) => {
 				event.preventDefault()
 				captureFile(event)
