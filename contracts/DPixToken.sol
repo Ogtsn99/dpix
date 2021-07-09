@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "hardhat/console.sol";
 
 contract DPixToken is ERC20 {
     constructor(
@@ -9,6 +10,10 @@ contract DPixToken is ERC20 {
         string memory symbol,
         uint256 initialSupply
     ) ERC20(name, symbol) {
+        console.log("DPixToken Deploying...");
+        console.log("name =", name);
+        console.log("symbol =", symbol);
+        console.log("initialSupply =", initialSupply);
         _mint(msg.sender, initialSupply);
     }
 }

@@ -19,6 +19,13 @@ contract DPix {
         address payable author;
     }
 
+    event PictureCreated(
+        uint id,
+        string hash,
+        string title,
+        address payable author
+    );
+
     constructor(address _tokenAddress) {
         dpixToken = DPixToken(_tokenAddress);
         owner = msg.sender;
@@ -34,23 +41,40 @@ contract DPix {
         require(bytes(_hash).length > 0);
         require(bytes(_title).length > 0);
         require(msg.sender != address(0));
+
         Picture memory newPicture = Picture(pictureCount, _hash, _title, payable(msg.sender));
         pictures[pictureCount] = newPicture;
         hashAuthorMap[_hash] = msg.sender;
         pictureCount++;
+
+        emit PictureCreated(pictureCount-1, _hash, _title, payable(msg.sender));
     }
+
+    event ImageTipped(
+        uint id,
+        string hash,
+        string title,
+        uint tipAmount,
+        address payable author
+    );
 
     function tipPictureOwner(uint _id) public payable {
         require(0 <= _id && pictureCount > _id);
         pictures[_id].author.transfer(msg.value);
+        emit ImageTipped(_id, pictures[_id].hash, pictures[_id].title, msg.value, pictures[_id].author);
     }
+
+    event ImageTippedByDPXT(
+        uint id,
+        string hash,
+        string title,
+        uint tipAmount,
+        address payable author
+    );
 
     function tipPictureOwnerByDPixToken(uint _id, uint _value) public {
         require(0 <= _id && pictureCount > _id);
-        console.log("balance:", dpixToken.balanceOf(msg.sender));
-        console.log("send:", _value);
-        console.log("allowance", dpixToken.allowance(msg.sender, pictures[_id].author));
         bool result = dpixToken.transferFrom(msg.sender, pictures[_id].author, _value);
-        console.log(result);
+        ImageTippedByDPXT(_id, pictures[_id].hash, pictures[_id].title, _value, pictures[_id].author);
     }
 }

@@ -11,12 +11,16 @@ module.exports = async ({
 		from: deployer,
 		args: ["DPixToken", "DPXT", "10000000000000000000000"]
 	});
-	console.log("DPixToken address is", result.address);
+	
+	const dpixTokenAddress = result.address;
 	
 	result = await deploy("DPix", {
 		from: deployer,
 		args: [result.address]
 	});
 	
-	console.log("DPix address is", result.address);
+	const dpixAddress = result.address;
+	
+	console.log("DPixToken address is", dpixTokenAddress);
+	console.log("DPix address is", dpixAddress);
 };

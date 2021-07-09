@@ -7,7 +7,7 @@ import { DPix } from "./DPix";
 function App() {
 	
 	return (
-		<div className="App">
+		<div>
 			<Symfoni autoInit={true}>
 				<DPix/>
 			</Symfoni>
