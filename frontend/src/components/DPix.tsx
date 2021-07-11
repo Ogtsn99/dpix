@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DPixContext, DPixTokenContext, CurrentAddressContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, CurrentAddressContext, DPixNFTContext } from "../hardhat/SymfoniContext";
 import ipfsClient from 'ipfs-http-client';
 import { BigNumber, ethers } from "ethers";
 import { Navbar } from "./Navbar";
@@ -15,6 +15,7 @@ const arrayBufferToBuffer = require('arraybuffer-to-buffer');
 export const DPix: React.FC<Props> = () => {
 	const dpix = useContext(DPixContext);
 	const dpixToken = useContext(DPixTokenContext);
+	const dpixNFT = useContext(DPixNFTContext);
 	const [balance, setBalance] = useState("0");
 	const [buffer, setBuffer] = useState<string | ArrayBuffer | null>(null);
 	const [title, setTitle] = useState("");
@@ -39,13 +40,22 @@ export const DPix: React.FC<Props> = () => {
 	}
 	
 	const uploadImage = () => {
-		if (buffer) {
-			ipfs.add(buffer).then((result) => {
-				dpix.instance?.addPicture(result.path, title);
-			}).catch(error => {
-				console.error(error);
-			})
-		} else window.alert('Buffer is empty');
+		if(!buffer) {
+			window.alert('Buffer is empty');
+			return ;
+		}
+		
+		ipfs.add(buffer).then((result) => {
+			let uri = {name: title, description: "", image: "ipfs:" + result.path};
+			let json = JSON.stringify(uri);
+			return ipfs.add(json)
+		}).then((result) => {
+			let uriPath = result.path;
+			dpix.instance?.addPicture(result.path, title, "ipfs:" + uriPath);
+		}).catch(error => {
+			console.error(error);
+		})
+		
 	}
 	
 	const getBalance = async () => {
@@ -67,6 +77,7 @@ export const DPix: React.FC<Props> = () => {
 			if (!dpix.instance || !dpixToken.instance) {
 				return
 			}
+			console.log(await dpixNFT.instance?.address)
 			setBalance(await getBalance());
 			
 			let pictureCount = (await dpix.instance?.pictureCount()!).toNumber();

@@ -16,4 +16,9 @@ contract DPixToken is ERC20 {
         console.log("initialSupply =", initialSupply);
         _mint(msg.sender, initialSupply);
     }
+
+    //FIXME　This function is for testing only It should be deleted when deploying to main Network!!
+    function faucet() public {
+        _mint(msg.sender, 10000);
+    }
 }
