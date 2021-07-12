@@ -5,7 +5,7 @@ import { CurrentAddressContext, DPixContext, DPixNFTContext } from "../hardhat/S
 import { ethers } from "ethers";
 import { ModalForBuying } from "./ModalForBuying";
 
-type Props = { picture: any };
+type Props = { picture: any, balance: string };
 
 export const Card: React.FC<Props> = (props) => {
 	const [modalShow_Tipping, setModalShow_Tipping] = React.useState(false);
@@ -13,7 +13,7 @@ export const Card: React.FC<Props> = (props) => {
 	const [modalShow_Buying, setModalShow_Buying] = React.useState(false);
 	const dpixNFT = useContext(DPixNFTContext);
 	const dpix = useContext(DPixContext);
-	const [currentAddress, setCurrentAddress] = useContext(CurrentAddressContext);
+	const [currentAddress] = useContext(CurrentAddressContext);
 	const [owner, setOwner] = React.useState("");
 	const [price, setPrice] = React.useState("");
 	const maxUINT256 = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
@@ -53,7 +53,7 @@ export const Card: React.FC<Props> = (props) => {
 				<small className="text-muted">author:</small>
 				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{props.picture.author.toLowerCase()}</small>
 				<small className="text-muted">owner:</small>
-				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{owner}</small>
+				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{owner.toLowerCase()}</small>
 				
 				{isOnSale && owner != currentAddress && <button className="btn btn-primary mr-1"
 				                                                onClick={e=>showModal(e, setModalShow_Buying)}
@@ -68,12 +68,14 @@ export const Card: React.FC<Props> = (props) => {
 				
 				<ModalForBuying
 					picture={props.picture}
+					balance={props.balance}
 					price={price}
 					show={modalShow_Buying}
 					onHide={() => setModalShow_Buying(false)}/>
 				
 				<ModalForTipping
 					picture={props.picture}
+					balance={props.balance}
 					show={modalShow_Tipping}
 					onHide={() => setModalShow_Tipping(false)}/>
 				

@@ -19,7 +19,7 @@ export const DPix: React.FC<Props> = () => {
 	const [buffer, setBuffer] = useState<string | ArrayBuffer | null>(null);
 	const [title, setTitle] = useState("");
 	const [pictures, setPictures] = useState<any>([]);
-	const [currentAddress, setCurrentAddress] = useContext(CurrentAddressContext)
+	const [currentAddress] = useContext(CurrentAddressContext)
 	
 	const faucet = async () => {
 		await dpixToken.instance?.faucet();
@@ -132,7 +132,7 @@ export const DPix: React.FC<Props> = () => {
 								{
 									slicedPictureArray.map((pic: any) => {
 										if(pic == null) return (<div className={"col"}/>)
-										else return <Card picture={pic}/>
+										else return <Card picture={pic} balance={balance}/>
 									})
 								}
 								<br/>

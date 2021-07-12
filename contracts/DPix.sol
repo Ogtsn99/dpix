@@ -98,7 +98,7 @@ contract DPix is Ownable {
 
     function buyNFT(uint _id) public idExists(_id) {
         require(price[_id] != type(uint256).max);
-        dpixToken.transferFrom(msg.sender, pictures[_id].author, price[_id]);
+        dpixToken.transferFrom(msg.sender, dpixNFT.ownerOf(_id), price[_id]);
         dpixNFT.transferFrom(dpixNFT.ownerOf(_id), msg.sender, _id);
         price[_id] = type(uint256).max;
     }

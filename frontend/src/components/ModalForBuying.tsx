@@ -1,9 +1,9 @@
 import React, { FC, useContext } from 'react';
 import { Button, Modal } from "react-bootstrap";
-import { DPixContext, DPixNFTContext, DPixTokenContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext } from "../hardhat/SymfoniContext";
 import { ethers } from "ethers";
 
-type Props = {picture:any, price:string, onHide: ()=>void, show: boolean};
+type Props = {picture:any, balance:string, price:string, onHide: ()=>void, show: boolean};
 
 export const ModalForBuying:React.FC<Props> = (props)=> {
 	
@@ -11,6 +11,10 @@ export const ModalForBuying:React.FC<Props> = (props)=> {
 	const dpixToken = useContext(DPixTokenContext);
 	
 	const purchaseNFT = async()=> {
+		if(ethers.utils.parseEther(props.price).gt(ethers.utils.parseEther(props.balance))) {
+			window.alert("You don't have enough DPXT!");
+			return ;
+		}
 		await dpixToken.instance?.approve(dpix.instance?.address!, ethers.utils.parseEther(props.price));
 		await dpix.instance?.buyNFT(props.picture.id);
 		props.onHide();

@@ -44,7 +44,7 @@ export const ModalForSettingPrice:React.FC<Props> = (props)=> {
 				</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
-				{ props.isOnSale ? <p>Current Price is {oldPrice}</p>: <p>This is not for sale now</p> }
+				{ props.isOnSale ? <p>Current Price is {oldPrice} DPXT</p>: <p>This is not for sale now</p> }
 				<form onSubmit={(e)=>{e.preventDefault(); sendNewPrice();}}>
 					<div className="form-group">
 						<label className="mr-1">new Price(DPXT):</label>

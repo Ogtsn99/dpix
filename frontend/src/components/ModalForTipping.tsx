@@ -3,7 +3,7 @@ import { Button, Modal } from "react-bootstrap";
 import { DPixContext, DPixTokenContext } from "../hardhat/SymfoniContext";
 import { ethers } from "ethers";
 
-type Props = {picture:any, onHide: ()=>void, show: boolean};
+type Props = {picture:any, balance:string, onHide: ()=>void, show: boolean};
 
 export const ModalForTipping:React.FC<Props> = (props)=> {
 	let currency = "eth";
@@ -14,6 +14,10 @@ export const ModalForTipping:React.FC<Props> = (props)=> {
 	const sendTip = async (event: any) => {
 		event.preventDefault();
 		let parsedAmount = ethers.utils.parseEther(amount);
+		if(parsedAmount.gt(ethers.utils.parseEther(props.balance))) {
+			window.alert("You don't have enough DPXT!");
+			return ;
+		}
 		if(!dpix.instance) return ;
 		try{
 			if(currency === "eth") {
