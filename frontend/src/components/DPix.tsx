@@ -36,7 +36,8 @@ export const DPix: React.FC<Props> = () => {
 			let buffer = reader.result;
 			try { // remove Exif
 				buffer = exifremove.remove(arrayBufferToBuffer(reader.result));
-			} finally {
+			} catch(e){}
+			finally {
 				setBuffer(buffer);
 			}
 		}
@@ -62,7 +63,12 @@ export const DPix: React.FC<Props> = () => {
 	}
 	
 	const getBalance = async () => {
-		let balanceBN: BigNumber = await dpixToken.instance?.balanceOf(currentAddress)!;
+		let balanceBN: BigNumber = ethers.utils.parseEther("0");
+		
+		if(currentAddress)
+		balanceBN = await dpixToken.instance?.balanceOf(currentAddress)!;
+		
+		if(balanceBN)
 		return ethers.utils.formatUnits(balanceBN, 18).toString();
 	}
 	
@@ -72,6 +78,7 @@ export const DPix: React.FC<Props> = () => {
 			const picture = await dpix.instance?.pictures(i)!;
 			array.push(picture);
 		}
+		console.log("number of picture = ", array.length)
 		return array;
 	}
 	
@@ -80,7 +87,7 @@ export const DPix: React.FC<Props> = () => {
 			if (!dpix.instance || !dpixToken.instance) {
 				return
 			}
-			setBalance(await getBalance());
+			setBalance((await getBalance())!);
 			
 			let pictureCount = (await dpix.instance?.pictureCount()!).toNumber();
 			setPictures(await getPictures(0, pictureCount))
