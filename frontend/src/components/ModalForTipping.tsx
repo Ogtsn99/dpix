@@ -9,18 +9,18 @@ export const ModalForTipping:React.FC<Props> = (props)=> {
 	let currency = "eth";
 	let amount = "0";
 	const dpix = useContext(DPixContext);
-	const dpixToken = useContext(DPixTokenContext)
+	const dpixToken = useContext(DPixTokenContext);
 	
 	const sendTip = async (event: any) => {
 		event.preventDefault();
-
+		let parsedAmount = ethers.utils.parseEther(amount);
 		if(!dpix.instance) return ;
 		try{
 			if(currency === "eth") {
-				await dpix.instance?.tipPictureOwner(props.picture.id, {value: ethers.utils.parseEther(amount)})
+				await dpix.instance?.tipPictureOwner(props.picture.id, {value: parsedAmount})
 			} else { // pay with DPXT
-				await dpixToken.instance?.approve(dpix.instance?.address, ethers.utils.parseEther(amount));
-				await dpix.instance?.tipPictureOwnerByDPixToken(props.picture.id, ethers.utils.parseEther(amount));
+				await dpixToken.instance?.approve(dpix.instance?.address, parsedAmount);
+				await dpix.instance?.tipPictureOwnerByDPixToken(props.picture.id, parsedAmount);
 			}
 		} catch (e) {
 			window.alert("You failed sending a tip...");
@@ -60,7 +60,7 @@ export const ModalForTipping:React.FC<Props> = (props)=> {
 							<option value="dpxt">DPXT</option>
 						</select>
 					</div>
-					<button type="submit" className="btn btn-primary">Tip</button>
+					<button type="submit" className="btn btn-success">Tip</button>
 				</form>
 			</Modal.Body>
 			<Modal.Footer>

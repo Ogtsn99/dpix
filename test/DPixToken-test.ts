@@ -16,7 +16,7 @@ describe("DPixToken", function () {
 		
 		const DPixToken = await ethers.getContractFactory("DPixToken", deployer);
 		
-		dpixToken = await DPixToken.deploy("DPixToken", "DPXT", "10000000000000000000000");
+		dpixToken = await DPixToken.deploy("DPixToken", "DPXT", "10000000000000000000000", false);
 	})
 	
 	describe('deployment', async () => {

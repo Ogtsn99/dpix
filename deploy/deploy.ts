@@ -14,7 +14,7 @@ module.exports = async ({
 	// Deployment of DPixToken
 	let result = await deploy("DPixToken", {
 		from: deployer,
-		args: ["DPixToken", "DPXT", "10000000000000000000000"]
+		args: ["DPixToken", "DPXT", "10000000000000000000000", true]
 	});
 	const dpixTokenAddress = result.address;
 	
@@ -34,7 +34,7 @@ module.exports = async ({
 	
 	// Change owner of DPixNFT to DPix contract
 	let dpixNFT = await ethers.getContractAt("DPixNFT", dpixNftAddress);
-	dpixNFT.connect((await ethers.getSigners())[0]).transferOwnership(dpixAddress);
+	await dpixNFT.connect((await ethers.getSigners())[0]).transferOwnership(dpixAddress);
 	
 	console.log("DPix Address:", dpixAddress);
 	console.log("DPixToken Address:", dpixTokenAddress);

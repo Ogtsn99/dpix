@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DPixContext, DPixTokenContext, CurrentAddressContext, DPixNFTContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, CurrentAddressContext } from "../hardhat/SymfoniContext";
 import ipfsClient from 'ipfs-http-client';
 import { BigNumber, ethers } from "ethers";
 import { Navbar } from "./Navbar";
@@ -15,12 +15,15 @@ const arrayBufferToBuffer = require('arraybuffer-to-buffer');
 export const DPix: React.FC<Props> = () => {
 	const dpix = useContext(DPixContext);
 	const dpixToken = useContext(DPixTokenContext);
-	const dpixNFT = useContext(DPixNFTContext);
 	const [balance, setBalance] = useState("0");
 	const [buffer, setBuffer] = useState<string | ArrayBuffer | null>(null);
 	const [title, setTitle] = useState("");
 	const [pictures, setPictures] = useState<any>([]);
 	const [currentAddress, setCurrentAddress] = useContext(CurrentAddressContext)
+	
+	const faucet = async () => {
+		await dpixToken.instance?.faucet();
+	}
 	
 	const captureFile = (event: any) => {
 		event.preventDefault();
@@ -31,7 +34,7 @@ export const DPix: React.FC<Props> = () => {
 		
 		reader.onloadend = () => {
 			let buffer = reader.result;
-			try { // remove Exif, if the file is jpeg.
+			try { // remove Exif
 				buffer = exifremove.remove(arrayBufferToBuffer(reader.result));
 			} finally {
 				setBuffer(buffer);
@@ -44,18 +47,18 @@ export const DPix: React.FC<Props> = () => {
 			window.alert('Buffer is empty');
 			return ;
 		}
-		
+		let hash = "";
 		ipfs.add(buffer).then((result) => {
-			let uri = {name: title, description: "", image: "ipfs:" + result.path};
+			hash = result.path;
+			let uri = {name: title, description: "", image: "ipfs:" + hash};
 			let json = JSON.stringify(uri);
 			return ipfs.add(json)
 		}).then((result) => {
 			let uriPath = result.path;
-			dpix.instance?.addPicture(result.path, title, "ipfs:" + uriPath);
+			dpix.instance?.addPicture(hash, title, "ipfs:" + uriPath);
 		}).catch(error => {
 			console.error(error);
 		})
-		
 	}
 	
 	const getBalance = async () => {
@@ -77,7 +80,6 @@ export const DPix: React.FC<Props> = () => {
 			if (!dpix.instance || !dpixToken.instance) {
 				return
 			}
-			console.log(await dpixNFT.instance?.address)
 			setBalance(await getBalance());
 			
 			let pictureCount = (await dpix.instance?.pictureCount()!).toNumber();
@@ -98,6 +100,7 @@ export const DPix: React.FC<Props> = () => {
 			<Navbar address={currentAddress}/>
 			<div className="container">
 				<h5 className="mt-1 text-right">You have {balance} DPXT</h5>
+				<button className="float-right" onClick={faucet}>faucet</button>
 				<form onSubmit={(event) => {
 					event.preventDefault()
 					captureFile(event)

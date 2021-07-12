@@ -20,7 +20,7 @@ describe("DPix", function () {
 		buyerAddress = await buyer.getAddress();
 		
 		const DPixToken = await ethers.getContractFactory("DPixToken", deployer);
-		dpixToken = await DPixToken.deploy("DPixToken", "DPXT", "10000000000000000000000");
+		dpixToken = await DPixToken.deploy("DPixToken", "DPXT", "10000000000000000000000", false);
 		const DPixNFT = await ethers.getContractFactory("DPixNFT", deployer);
 		dpixNFT = await DPixNFT.deploy("DPixNFT", "DPXT");
 		const DPix = await ethers.getContractFactory("DPix", deployer);
@@ -211,6 +211,7 @@ describe("DPix", function () {
 			await dpix.connect(buyer).buyNFT(0, {gasPrice: 0});
 			let newBuyerBalance = await dpixToken.balanceOf(buyerAddress);
 			assert.equal(oldBuyerBalance.sub("1").toString(), newBuyerBalance.toString());
+			assert.equal(await dpix.price(0), "115792089237316195423570985008687907853269984665640564039457584007913129639935");
 		})
 		
 		
