@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DPixContext, DPixTokenContext, CurrentAddressContext, DPixNFTContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, CurrentAddressContext, DPixNFTContext } from "./SymfoniContext";
 import ipfsClient from 'ipfs-http-client';
 import { BigNumber, ethers } from "ethers";
 import { Navbar } from "./Navbar";

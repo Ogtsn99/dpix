@@ -1,6 +1,6 @@
 import React, { FC, useContext } from 'react';
 import { Button, Modal } from "react-bootstrap";
-import { DPixContext, DPixTokenContext, SignerContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, SignerContext } from "./SymfoniContext";
 import { ethers } from "ethers";
 
 type Props = {picture:any, balance:string, onHide: ()=>void, show: boolean};

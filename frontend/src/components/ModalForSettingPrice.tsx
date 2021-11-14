@@ -1,6 +1,6 @@
 import React, { Dispatch, FC, SetStateAction, useContext, useEffect } from 'react';
 import { Button, Modal } from "react-bootstrap";
-import { DPixContext, DPixNFTContext, DPixTokenContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixNFTContext, DPixTokenContext } from "./SymfoniContext";
 import { ethers } from "ethers";
 
 type Props = {picture:any, price:string, isOnSale: boolean, onHide: ()=>void, show: boolean};

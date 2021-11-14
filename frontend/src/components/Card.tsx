@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { ModalForTipping } from "./ModalForTipping";
 import { ModalForSettingPrice } from "./ModalForSettingPrice";
-import { CurrentAddressContext, DPixContext, DPixNFTContext } from "../hardhat/SymfoniContext";
+import { CurrentAddressContext, DPixContext, DPixNFTContext } from "./SymfoniContext";
 import { ethers } from "ethers";
 import { ModalForBuying } from "./ModalForBuying";
 

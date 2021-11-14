@@ -1,6 +1,6 @@
 import React from 'react';
 import '../App.css';
-import { Symfoni } from "../hardhat/SymfoniContext";
+import { Symfoni } from "./SymfoniContext";
 import { DPix } from "./DPix";
 
 function App() {
