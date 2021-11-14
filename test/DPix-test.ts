@@ -46,7 +46,7 @@ describe("DPix", function () {
 	})
 	
 	it("can get uri", async() => {
-		assert.equal("ipfs:abc", await dpixNFT.tokenURI(0));
+		assert.equal("https://ipfs.io/ipfs/abc", await dpixNFT.tokenURI(0));
 	})
 	
 	describe('tipping', async() => {
@@ -120,7 +120,7 @@ describe("DPix", function () {
 			await dpix.connect(buyer).buyNFT(0, {gasPrice: 0});
 			let newBuyerBalance = await dpixToken.balanceOf(buyerAddress);
 			assert.equal(oldBuyerBalance.sub("1").toString(), newBuyerBalance.toString());
-			assert.equal(await dpix.price(0), "115792089237316195423570985008687907853269984665640564039457584007913129639935");
+			assert.equal(await dpix.price(0), "0");
 		})
 	})
 });
