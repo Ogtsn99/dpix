@@ -25,9 +25,10 @@ describe("DPix", function () {
 		dpixNFT = await DPixNFT.deploy("DPixNFT", "DPXT");
 		const DPix = await ethers.getContractFactory("DPix", deployer);
 		dpix = await DPix.deploy(dpixToken.address, dpixNFT.address);
-		await dpixNFT.connect(deployer).transferOwnership(dpix.address);
+		
 		await dpixToken.connect(deployer).transfer(tipperAddress, "1000");
 		await dpixToken.connect(deployer).transfer(buyerAddress, "1000");
+		dpixNFT.connect(author).mint(authorAddress, "abc");
 	})
 	
 	describe('development', async() => {
@@ -39,119 +40,27 @@ describe("DPix", function () {
 			assert.notEqual(address, undefined);
 		});
 		
-		it("has a name", async ()=> {
-			assert.equal(await dpix.name(), "DPix");
-		});
-		
-		it('initially pictureCount is 0', async () => {
-			let pictureCount = await dpix.pictureCount();
-			assert.equal(pictureCount.toNumber(), 0);
-		})
-		
 		it('initially the tipper has 1000 DPXT', async () => {
 			assert.equal((await dpixToken.balanceOf(tipperAddress)).toString(), "1000");
 		})
 	})
 	
-	describe('pictures', async()=> {
-		const hash = "hash123";
-		const title = "this is title";
-		const uri = "ipfs:thisIsURI";
-		
-		it('should allow to add new picture', async () => {
-			let pictureCount = await dpix.pictureCount();
-			assert.equal(pictureCount.toNumber(), 0);
-			await dpix.connect(author).addPicture(hash, title, uri, {gasPrice: 0});
-			pictureCount = await dpix.pictureCount();
-			assert.equal(pictureCount.toNumber(), 1);
-			let addedPicture = await dpix.pictures(0);
-			assert.equal(addedPicture.id.toNumber(), 0);
-			assert.equal(addedPicture.hash, hash);
-			assert.equal(addedPicture.title, title);
-			assert.equal(addedPicture.author, authorAddress);
-		})
-		
-		it('should have minted NFT when the user add a picture', async ()=> {
-			assert.equal(await dpixNFT.ownerOf(0), authorAddress);
-			assert.equal((await dpixNFT.balanceOf(authorAddress)).toString(), "1");
-		})
-		
-		it("should throw when a user try uploading a picture whose hash already exists", async ()=> {
-			let error = null;
-			
-			try {
-				await dpix.connect(author2).addPicture(hash, title, {gasPrice: 0});
-			} catch (err) {
-				error = err;
-			}
-			
-			assert.equal((await dpix.pictureCount()).toString(), "1");
-			assert.isNotNull(error, "You're uploading file already exists");
-			expect(error).to.be.an(`Error`);
-		})
+	it("can get uri", async() => {
+		assert.equal("ipfs:abc", await dpixNFT.tokenURI(0));
 	})
 	
-	/* should refactor... */
-	describe('tipping', async ()=> {
-		it('allows users to tip pictures', async ()=> {
-			let oldAuthorBalance: BigNumber = await author.getBalance();
-			let oldTipperBalance: BigNumber = await tipper.getBalance();
-			
-			await dpix.connect(tipper).tipPictureOwner(0, {value: ethers.utils.parseEther("1"), gasPrice: 0});
-	
-			let newAuthorBalance: BigNumber = await author.getBalance();
-			let newTipperBalance: BigNumber = await tipper.getBalance();
-			
-			assert.equal(newAuthorBalance.toString(), oldAuthorBalance.add(ethers.utils.parseEther("1")).toString());
-			assert.equal(newTipperBalance.toString(), oldTipperBalance.sub(ethers.utils.parseEther("1")).toString());
-		})
-		
-		it('should throw when users tip to a picture not exist', async ()=> {
-			let nonexistentId = 114514;
-			let error = null;
-			let oldTipperBalance: BigNumber = await tipper.getBalance();
-			let oldAuthorBalance: BigNumber = await author.getBalance();
-			try {
-				await dpix.connect(tipper).tipPictureOwner(nonexistentId, {value: ethers.utils.parseEther("1"), gasPrice: 0});
-			} catch (err) {
-				error = err;
-			}
-			let newTipperBalance: BigNumber = await tipper.getBalance();
-			let newAuthorBalance: BigNumber = await author.getBalance();
-			assert.equal(oldTipperBalance.toString(), newTipperBalance.toString());
-			assert.equal(oldAuthorBalance.toString(), newAuthorBalance.toString());
-			expect(error).to.be.an(`Error`);
-		});
-		
-		it('should throw when users try to tip more than they really have', async()=> {
-			let error = null;
-			let oldTipperBalance: BigNumber = await tipper.getBalance();
-			let oldAuthorBalance: BigNumber = await author.getBalance();
-			try {
-				await dpix.connect(tipper).tipPictureOwner(0, {value: ethers.utils.parseEther("9999999999"), gasPrice: 0});
-			} catch (err) {
-				error = err;
-			}
-			let newTipperBalance: BigNumber = await tipper.getBalance();
-			let newAuthorBalance: BigNumber = await author.getBalance();
-			assert.equal(oldTipperBalance.toString(), newTipperBalance.toString());
-			assert.equal(oldAuthorBalance.toString(), newAuthorBalance.toString());
-			expect(error).to.be.an(`Error`);
-		})
-		
+	describe('tipping', async() => {
 		it('allows users to tip pictures by DPXT', async ()=> {
 			let oldAuthorBalance: BigNumber = await dpixToken.balanceOf(authorAddress);
 			let oldTipperBalance: BigNumber = await dpixToken.balanceOf(tipperAddress);
 			
-			await dpixToken.connect(tipper).approve(dpix.address, "893", {gasPrice: 0});
-			assert.equal((await dpixToken.allowance(tipperAddress, dpix.address)), "893");
-			await dpix.connect(tipper).tipPictureOwnerByDPixToken(0, "893", {gasPrice: 0});
+			await dpixToken.connect(tipper).transfer(await dpixNFT.creatorOf(0), 893, {gasPrice: 0});
 			
 			let newAuthorBalance: BigNumber = await dpixToken.balanceOf(authorAddress);
 			let newTipperBalance: BigNumber = await dpixToken.balanceOf(tipperAddress);
 			
-			assert.equal(newAuthorBalance.toString(), oldAuthorBalance.add("893").toString());
-			assert.equal(newTipperBalance.toString(), oldTipperBalance.sub("893").toString());
+			assert.equal(newAuthorBalance.toString(), oldAuthorBalance.add(893).toString());
+			assert.equal(newTipperBalance.toString(), oldTipperBalance.sub(893).toString());
 		})
 		
 		it('should throw when users try to tip by DPXT more than they really have', async()=> {
@@ -212,24 +121,6 @@ describe("DPix", function () {
 			let newBuyerBalance = await dpixToken.balanceOf(buyerAddress);
 			assert.equal(oldBuyerBalance.sub("1").toString(), newBuyerBalance.toString());
 			assert.equal(await dpix.price(0), "115792089237316195423570985008687907853269984665640564039457584007913129639935");
-		})
-		
-		
-		it('should throw when nft not approved', async()=> {
-			let oldBuyerBalance = await dpixToken.balanceOf(buyerAddress);
-			let error = null;
-			dpix.connect(author).addPicture("aaa", "bbb", "ccc");
-			assert((await dpix.pictureCount()).toString(), "2");
-			await dpix.connect(author).setPrice(1, 1);
-			await dpixToken.connect(buyer).approve(dpix.address, "1", {gasPrice: 0});
-			try {
-				await dpix.connect(buyer).buyNFT(1, {gasPrice: 0});
-			} catch (err) {
-				error = err;
-			}
-			expect(error).to.be.an(`Error`);
-			let newBuyerBalance = await dpixToken.balanceOf(buyerAddress);
-			assert.equal(oldBuyerBalance.toString(), newBuyerBalance.toString());
 		})
 	})
 });

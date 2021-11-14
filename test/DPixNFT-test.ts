@@ -1,8 +1,7 @@
 // @ts-ignore
 import { ethers } from "hardhat";
 import { Signer } from "ethers";
-import { assert, expect } from "chai";
-import { BigNumber } from '@ethersproject/bignumber';
+import { assert } from "chai";
 import { DPixNFT } from "../frontend/src/hardhat/typechain/DPixNFT";
 
 describe("DPixNFT", function () {
