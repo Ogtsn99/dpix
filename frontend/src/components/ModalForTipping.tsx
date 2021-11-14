@@ -1,6 +1,6 @@
 import React, { FC, useContext } from 'react';
 import { Button, Modal } from "react-bootstrap";
-import { DPixContext, DPixTokenContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, SignerContext } from "../hardhat/SymfoniContext";
 import { ethers } from "ethers";
 
 type Props = {picture:any, balance:string, onHide: ()=>void, show: boolean};
@@ -10,21 +10,22 @@ export const ModalForTipping:React.FC<Props> = (props)=> {
 	let amount = "0";
 	const dpix = useContext(DPixContext);
 	const dpixToken = useContext(DPixTokenContext);
+	const [signer] = useContext(SignerContext);
 	
 	const sendTip = async (event: any) => {
 		event.preventDefault();
 		let parsedAmount = ethers.utils.parseEther(amount);
-		if(parsedAmount.gt(ethers.utils.parseEther(props.balance))) {
-			window.alert("You don't have enough DPXT!");
-			return ;
-		}
+		
 		if(!dpix.instance) return ;
 		try{
 			if(currency === "eth") {
-				await dpix.instance?.tipPictureOwner(props.picture.id, {value: parsedAmount})
+				await signer?.sendTransaction({to: props.picture.creator, value: parsedAmount});
 			} else { // pay with DPXT
-				await dpixToken.instance?.approve(dpix.instance?.address, parsedAmount);
-				await dpix.instance?.tipPictureOwnerByDPixToken(props.picture.id, parsedAmount);
+				if(parsedAmount.gt(ethers.utils.parseEther(props.balance))) {
+					window.alert("You don't have enough DPXT!");
+					return ;
+				}
+				await dpixToken.instance?.transfer(props.picture.creator, parsedAmount);
 			}
 		} catch (e) {
 			window.alert("You failed sending a tip...");
@@ -51,7 +52,7 @@ export const ModalForTipping:React.FC<Props> = (props)=> {
 				</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
-				<p>author: {props.picture.author}</p>
+				<p>author: {props.picture.creator}</p>
 				<form onSubmit={sendTip}>
 					<div className="form-group">
 						<label className="mr-1">Amount:</label>

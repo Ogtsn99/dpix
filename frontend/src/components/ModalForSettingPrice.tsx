@@ -1,34 +1,30 @@
-import React, { Dispatch, FC, SetStateAction, useContext } from 'react';
+import React, { Dispatch, FC, SetStateAction, useContext, useEffect } from 'react';
 import { Button, Modal } from "react-bootstrap";
 import { DPixContext, DPixNFTContext, DPixTokenContext } from "../hardhat/SymfoniContext";
 import { ethers } from "ethers";
 
-type Props = {picture:any, price:string, isOnSale:boolean, onHide: ()=>void, show: boolean};
+type Props = {picture:any, price:string, isOnSale: boolean, onHide: ()=>void, show: boolean};
 
 export const ModalForSettingPrice:React.FC<Props> = (props)=> {
 	const oldPrice = props.price;
-	const maxUINT256 = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
-	
 	const [newPrice, setNewPrice] = React.useState(props.price);
 	const dpix = useContext(DPixContext);
-	const dpixToken = useContext(DPixTokenContext)
 	const dpixNFT = useContext(DPixNFTContext);
 	
 	const sendNewPrice = async () => {
 		console.log("address", dpix.instance?.address, "id", props.picture.id);
 		await dpixNFT.instance?.approve(dpix.instance?.address!, props.picture.id);
-		
 		await dpix.instance?.setPrice(props.picture.id, ethers.utils.parseEther(newPrice));
 		props.onHide();
 	}
 	
 	const toNotForSale = async () => {
-		console.log(props.isOnSale)
 		if(!props.isOnSale) {
 			alert("This is already not for sale");
 			return ;
 		}
-		await dpix.instance?.setPrice(props.picture.id, maxUINT256);
+		
+		await dpix.instance?.setPrice(props.picture.id, 0);
 	}
 	
 	return (
@@ -52,7 +48,7 @@ export const ModalForSettingPrice:React.FC<Props> = (props)=> {
 						       onChange={(event)=>{setNewPrice(event.target.value)}}/>
 					</div>
 					<button type="submit" className="btn btn-primary mr-1">set price</button>
-					<button type="button" className="btn btn-secondary" onClick={toNotForSale}>make it not for sale</button>
+					<button type="button" className="btn btn-secondary" onClick={toNotForSale} disabled={!props.isOnSale}>make it not for sale</button>
 				</form>
 			</Modal.Body>
 			<Modal.Footer>

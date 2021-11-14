@@ -14,9 +14,8 @@ export const Card: React.FC<Props> = (props) => {
 	const dpixNFT = useContext(DPixNFTContext);
 	const dpix = useContext(DPixContext);
 	const [currentAddress] = useContext(CurrentAddressContext);
-	const [owner, setOwner] = React.useState("");
+	const [imageURL, setImageURL] = React.useState("");
 	const [price, setPrice] = React.useState("");
-	const maxUINT256 = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 	const [isOnSale, setIsOnSale] = React.useState(false);
 	
 	const showModal = (e:any, setModal: any)=> {
@@ -30,11 +29,10 @@ export const Card: React.FC<Props> = (props) => {
 				return
 			}
 			
-			setOwner(await dpixNFT.instance.ownerOf(props.picture.id));
-			
+			setImageURL("https://ipfs.io/ipfs/" + props.picture.image.split(':')[1])
 			let price = (await dpix.instance.price(props.picture.id)).toString();
 			
-			setIsOnSale(price !== maxUINT256);
+			setIsOnSale(price !== "0");
 			
 			let priceFormatChanged = ethers.utils.formatUnits(price, 18).toString()
 			setPrice(priceFormatChanged);
@@ -44,22 +42,22 @@ export const Card: React.FC<Props> = (props) => {
 	
 	return (
 		<div className={"card col"}>
-			<a href={"https://ipfs.io/ipfs/" + props.picture.hash} target="_blank" rel="noopener noreferrer">
-				<img src={"https://ipfs.io/ipfs/" + props.picture.hash} className="card-img-top"
+			<a href={props.picture.image} target="_blank" rel="noopener noreferrer">
+				<img src={imageURL} className="card-img-top"
 				     style={{width: "100%", height: "20vw", objectFit: "cover"}} alt="..."/>
 			</a>
 			<div className="card-body">
 				<h5 className="card-title">{props.picture.title}</h5>
 				<small className="text-muted">author:</small>
-				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{props.picture.author.toLowerCase()}</small>
+				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{props.picture.creator}</small>
 				<small className="text-muted">owner:</small>
-				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{owner.toLowerCase()}</small>
+				<small className="text-muted" style={{whiteSpace: 'nowrap'}}>{props.picture.owner}</small>
 				
-				{isOnSale && owner != currentAddress && <button className="btn btn-primary mr-1"
+				{isOnSale && props.picture.owner != currentAddress && <button className="btn btn-primary mr-1"
 				                                                onClick={e=>showModal(e, setModalShow_Buying)}
 				>Buy{/* {price}DPXT */}</button>}
 				
-				{owner == currentAddress && <button className="btn btn-primary mr-1"
+				{props.picture.owner == currentAddress && <button className="btn btn-primary mr-1"
 				                                    onClick={e=>showModal(e, setModalShow_SetPrice)}
 				>set price</button>}
 				

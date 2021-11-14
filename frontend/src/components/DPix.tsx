@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DPixContext, DPixTokenContext, CurrentAddressContext } from "../hardhat/SymfoniContext";
+import { DPixContext, DPixTokenContext, CurrentAddressContext, DPixNFTContext } from "../hardhat/SymfoniContext";
 import ipfsClient from 'ipfs-http-client';
 import { BigNumber, ethers } from "ethers";
 import { Navbar } from "./Navbar";
@@ -15,11 +15,25 @@ const arrayBufferToBuffer = require('arraybuffer-to-buffer');
 export const DPix: React.FC<Props> = () => {
 	const dpix = useContext(DPixContext);
 	const dpixToken = useContext(DPixTokenContext);
+	const dpixNFT = useContext(DPixNFTContext);
 	const [balance, setBalance] = useState("0");
 	const [buffer, setBuffer] = useState<string | ArrayBuffer | null>(null);
 	const [title, setTitle] = useState("");
 	const [pictures, setPictures] = useState<any>([]);
-	const [currentAddress] = useContext(CurrentAddressContext)
+	const [currentAddress] = useContext(CurrentAddressContext);
+	
+	useEffect(() => {
+		const doAsync = async () => {
+			if (!dpix.instance || !dpixToken.instance) {
+				return;
+			}
+			setBalance((await getBalance())!);
+			
+			let pictureCount = (await dpixNFT.instance?.tokenCount()!).toNumber();
+			setPictures(await getPictures(0, pictureCount))
+		};
+		doAsync();
+	}, [])
 	
 	const faucet = async () => {
 		await dpixToken.instance?.faucet();
@@ -53,10 +67,10 @@ export const DPix: React.FC<Props> = () => {
 			hash = result.path;
 			let uri = {name: title, description: "", image: "ipfs:" + hash};
 			let json = JSON.stringify(uri);
-			return ipfs.add(json)
+			return ipfs.add(json);
 		}).then((result) => {
-			let uriPath = result.path;
-			dpix.instance?.addPicture(hash, title, "ipfs:" + uriPath);
+			console.log(result.path);
+			dpixNFT.instance?.mint(currentAddress, result.path);
 		}).catch(error => {
 			console.error(error);
 		})
@@ -75,25 +89,17 @@ export const DPix: React.FC<Props> = () => {
 	const getPictures = async (from: number, to: number) => {
 		let array = [];
 		for (let i = from; i < to; i++) {
-			const picture = await dpix.instance?.pictures(i)!;
-			array.push(picture);
+			let uri = (await dpixNFT.instance?.tokenURI(i)!).toString();
+			let data = await (await fetch(uri)).json();
+			data.id = i;
+			data.owner = await dpixNFT.instance?.ownerOf(i);
+			data.creator = await dpixNFT.instance?.creatorOf(i);
+			console.log(data);
+			array.push(data);
 		}
 		console.log("number of picture = ", array.length)
 		return array;
 	}
-	
-	useEffect(() => {
-		const doAsync = async () => {
-			if (!dpix.instance || !dpixToken.instance) {
-				return
-			}
-			setBalance((await getBalance())!);
-			
-			let pictureCount = (await dpix.instance?.pictureCount()!).toNumber();
-			setPictures(await getPictures(0, pictureCount))
-		};
-		doAsync();
-	}, [dpix])
 	
 	const sliceByNumber = (array: [], num: number) => {
 		const length = Math.ceil(array.length / num)
