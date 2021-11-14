@@ -4,19 +4,19 @@
 import { providers, Signer, ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import Web3Modal, { IProviderOptions } from "web3modal";
-import DPixDeployment from "../hardhat/deployments/ropsten/DPix.json";
-import { DPix } from "../hardhat/typechain/DPix";
-import { DPix__factory } from "../hardhat/typechain/factories/DPix__factory";
-import DPixTokenDeployment from "../hardhat/deployments/ropsten/DPixToken.json";
-import { DPixToken } from "../hardhat/typechain/DPixToken";
-import { DPixToken__factory } from "../hardhat/typechain/factories/DPixToken__factory";
-import DPixNFTDeployment from "../hardhat/deployments/ropsten/DPixNFT.json";
-import { DPixNFT } from "../hardhat/typechain/DPixNFT";
-import { DPixNFT__factory } from "../hardhat/typechain/factories/DPixNFT__factory";
-import { ERC20 } from "../hardhat/typechain/ERC20";
-import { ERC20__factory } from "../hardhat/typechain/factories/ERC20__factory";
-import { ERC721 } from "../hardhat/typechain/ERC721";
-import { ERC721__factory } from "../hardhat/typechain/factories/ERC721__factory";
+import DPixDeployment from "./deployments/ropsten/DPix.json";
+import { DPix } from "./typechain/DPix";
+import { DPix__factory } from "./typechain/factories/DPix__factory";
+import DPixTokenDeployment from "./deployments/ropsten/DPixToken.json";
+import { DPixToken } from "./typechain/DPixToken";
+import { DPixToken__factory } from "./typechain/factories/DPixToken__factory";
+import DPixNFTDeployment from "./deployments/ropsten/DPixNFT.json";
+import { DPixNFT } from "./typechain/DPixNFT";
+import { DPixNFT__factory } from "./typechain/factories/DPixNFT__factory";
+import { ERC20 } from "./typechain/ERC20";
+import { ERC20__factory } from "./typechain/factories/ERC20__factory";
+import { ERC721 } from "./typechain/ERC721";
+import { ERC721__factory } from "./typechain/factories/ERC721__factory";
 
 const emptyContract = {
     instance: undefined,
