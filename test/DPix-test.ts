@@ -80,23 +80,6 @@ describe("DPix", function () {
 			expect(error).to.be.an(`Error`);
 		})
 		
-		it('should throw when users tip by DPXT to a picture not exist', async ()=> {
-			let nonexistentId = 114514;
-			let error = null;
-			let oldTipperBalance: BigNumber = await dpixToken.balanceOf(tipperAddress);
-			let oldAuthorBalance: BigNumber = await dpixToken.balanceOf(authorAddress);
-			await dpixToken.connect(tipper).approve(dpix.address, "1", {gasPrice: 0});
-			try {
-				await dpix.connect(tipper).tipPictureOwnerByDPixToken(nonexistentId, "1", {gasPrice: 0});
-			} catch (err) {
-				error = err;
-			}
-			let newTipperBalance: BigNumber = await dpixToken.balanceOf(tipperAddress);
-			let newAuthorBalance: BigNumber = await dpixToken.balanceOf(authorAddress);
-			assert.equal(oldTipperBalance.toString(), newTipperBalance.toString());
-			assert.equal(oldAuthorBalance.toString(), newAuthorBalance.toString());
-			expect(error).to.be.an(`Error`);
-		});
 	})
 	
 	describe('NFT', async()=> {
