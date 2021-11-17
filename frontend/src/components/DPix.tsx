@@ -30,6 +30,7 @@ export const DPix: React.FC<Props> = () => {
 			setBalance((await getBalance())!);
 			
 			let pictureCount = (await dpixNFT.instance?.tokenCount()!).toNumber();
+			console.log("pictureCount=", pictureCount);
 			setPictures(await getPictures(0, pictureCount))
 		};
 		doAsync();
@@ -65,7 +66,7 @@ export const DPix: React.FC<Props> = () => {
 		let hash = "";
 		ipfs.add(buffer).then((result) => {
 			hash = result.path;
-			let uri = {name: title, description: "", image: "ipfs:" + hash};
+			let uri = {name: title, description: "", image: "https://ipfs.io/ipfs/" + hash};
 			let json = JSON.stringify(uri);
 			return ipfs.add(json);
 		}).then((result) => {
@@ -90,6 +91,7 @@ export const DPix: React.FC<Props> = () => {
 		let array = [];
 		for (let i = from; i < to; i++) {
 			let uri = (await dpixNFT.instance?.tokenURI(i)!).toString();
+			console.log(uri);
 			let data = await (await fetch(uri)).json();
 			data.id = i;
 			data.owner = await dpixNFT.instance?.ownerOf(i);

@@ -29,7 +29,7 @@ export const Card: React.FC<Props> = (props) => {
 				return
 			}
 			
-			setImageURL("https://ipfs.io/ipfs/" + props.picture.image.split(':')[1])
+			setImageURL(props.picture.image)
 			let price = (await dpix.instance.price(props.picture.id)).toString();
 			
 			setIsOnSale(price !== "0");

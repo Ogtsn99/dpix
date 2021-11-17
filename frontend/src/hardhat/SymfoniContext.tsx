@@ -4,15 +4,15 @@
 import { providers, Signer, ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import Web3Modal, { IProviderOptions } from "web3modal";
-import DPixDeployment from "./deployments/ropsten/DPix.json";
+import DPixDeployment from "./deployments/rinkeby/DPix.json";
 import { DPix } from "./typechain/DPix";
 import { DPix__factory } from "./typechain/factories/DPix__factory";
-import DPixTokenDeployment from "./deployments/ropsten/DPixToken.json";
-import { DPixToken } from "./typechain/DPixToken";
-import { DPixToken__factory } from "./typechain/factories/DPixToken__factory";
-import DPixNFTDeployment from "./deployments/ropsten/DPixNFT.json";
+import DPixNFTDeployment from "./deployments/rinkeby/DPixNFT.json";
 import { DPixNFT } from "./typechain/DPixNFT";
 import { DPixNFT__factory } from "./typechain/factories/DPixNFT__factory";
+import DPixTokenDeployment from "./deployments/rinkeby/DPixToken.json";
+import { DPixToken } from "./typechain/DPixToken";
+import { DPixToken__factory } from "./typechain/factories/DPixToken__factory";
 import { ERC20 } from "./typechain/ERC20";
 import { ERC20__factory } from "./typechain/factories/ERC20__factory";
 import { ERC721 } from "./typechain/ERC721";
@@ -37,8 +37,8 @@ const defaultSymfoniContext: SymfoniContextInterface = {
 };
 export const SymfoniContext = React.createContext<SymfoniContextInterface>(defaultSymfoniContext);
 export const DPixContext = React.createContext<SymfoniDPix>(emptyContract);
-export const DPixTokenContext = React.createContext<SymfoniDPixToken>(emptyContract);
 export const DPixNFTContext = React.createContext<SymfoniDPixNFT>(emptyContract);
+export const DPixTokenContext = React.createContext<SymfoniDPixToken>(emptyContract);
 export const ERC20Context = React.createContext<SymfoniERC20>(emptyContract);
 export const ERC721Context = React.createContext<SymfoniERC721>(emptyContract);
 
@@ -61,14 +61,14 @@ export interface SymfoniDPix {
     factory?: DPix__factory;
 }
 
-export interface SymfoniDPixToken {
-    instance?: DPixToken;
-    factory?: DPixToken__factory;
-}
-
 export interface SymfoniDPixNFT {
     instance?: DPixNFT;
     factory?: DPixNFT__factory;
+}
+
+export interface SymfoniDPixToken {
+    instance?: DPixToken;
+    factory?: DPixToken__factory;
 }
 
 export interface SymfoniERC20 {
@@ -96,8 +96,8 @@ export const Symfoni: React.FC<SymfoniProps> = ({
     const [fallbackProvider] = useState<string | undefined>(undefined);
     const [providerPriority, setProviderPriority] = useState<string[]>(["web3modal", "hardhat"]);
     const [DPix, setDPix] = useState<SymfoniDPix>(emptyContract);
-    const [DPixToken, setDPixToken] = useState<SymfoniDPixToken>(emptyContract);
     const [DPixNFT, setDPixNFT] = useState<SymfoniDPixNFT>(emptyContract);
+    const [DPixToken, setDPixToken] = useState<SymfoniDPixToken>(emptyContract);
     const [ERC20, setERC20] = useState<SymfoniERC20>(emptyContract);
     const [ERC721, setERC721] = useState<SymfoniERC721>(emptyContract);
     useEffect(() => {
@@ -180,8 +180,8 @@ export const Symfoni: React.FC<SymfoniProps> = ({
             }
             const finishWithContracts = (text: string) => {
                 setDPix(getDPix(_provider, _signer))
-                setDPixToken(getDPixToken(_provider, _signer))
                 setDPixNFT(getDPixNFT(_provider, _signer))
+                setDPixToken(getDPixToken(_provider, _signer))
                 setERC20(getERC20(_provider, _signer))
                 setERC721(getERC721(_provider, _signer))
                 finish(text)
@@ -223,17 +223,6 @@ export const Symfoni: React.FC<SymfoniProps> = ({
         return contract
     }
         ;
-    const getDPixToken = (_provider: providers.Provider, _signer?: Signer) => {
-
-        const contractAddress = DPixTokenDeployment.receipt.contractAddress
-        const instance = _signer ? DPixToken__factory.connect(contractAddress, _signer) : DPixToken__factory.connect(contractAddress, _provider)
-        const contract: SymfoniDPixToken = {
-            instance: instance,
-            factory: _signer ? new DPixToken__factory(_signer) : undefined,
-        }
-        return contract
-    }
-        ;
     const getDPixNFT = (_provider: providers.Provider, _signer?: Signer) => {
 
         const contractAddress = DPixNFTDeployment.receipt.contractAddress
@@ -241,6 +230,17 @@ export const Symfoni: React.FC<SymfoniProps> = ({
         const contract: SymfoniDPixNFT = {
             instance: instance,
             factory: _signer ? new DPixNFT__factory(_signer) : undefined,
+        }
+        return contract
+    }
+        ;
+    const getDPixToken = (_provider: providers.Provider, _signer?: Signer) => {
+
+        const contractAddress = DPixTokenDeployment.receipt.contractAddress
+        const instance = _signer ? DPixToken__factory.connect(contractAddress, _signer) : DPixToken__factory.connect(contractAddress, _provider)
+        const contract: SymfoniDPixToken = {
+            instance: instance,
+            factory: _signer ? new DPixToken__factory(_signer) : undefined,
         }
         return contract
     }
@@ -278,8 +278,8 @@ export const Symfoni: React.FC<SymfoniProps> = ({
                 <SignerContext.Provider value={[signer, setSigner]}>
                     <CurrentAddressContext.Provider value={[currentAddress, setCurrentAddress]}>
                         <DPixContext.Provider value={DPix}>
-                            <DPixTokenContext.Provider value={DPixToken}>
-                                <DPixNFTContext.Provider value={DPixNFT}>
+                            <DPixNFTContext.Provider value={DPixNFT}>
+                                <DPixTokenContext.Provider value={DPixToken}>
                                     <ERC20Context.Provider value={ERC20}>
                                         <ERC721Context.Provider value={ERC721}>
                                             {showLoading && loading ?
@@ -294,8 +294,8 @@ export const Symfoni: React.FC<SymfoniProps> = ({
                                             }
                                         </ERC721Context.Provider >
                                     </ERC20Context.Provider >
-                                </DPixNFTContext.Provider >
-                            </DPixTokenContext.Provider >
+                                </DPixTokenContext.Provider >
+                            </DPixNFTContext.Provider >
                         </DPixContext.Provider >
                     </CurrentAddressContext.Provider>
                 </SignerContext.Provider>

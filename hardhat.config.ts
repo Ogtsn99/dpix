@@ -39,9 +39,8 @@ const config: HardhatUserConfig = {
       accounts: [`0x${process.env.ROPSTEN_PRIVATE_KEY}`]
     },
     rinkeby: {
-      chainId: 4,
-      url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY_RINKEBY}`,
-      accounts: [`0x${process.env.ROPSTEN_PRIVATE_KEY}`]
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY_RINKEBY}`,
+      accounts: [`0x${process.env.RINKEBY_PRIVATE_KEY}`]
     }
   },
   solidity: {
