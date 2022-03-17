@@ -20,6 +20,8 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
+console.log(process.env.ALCHEMY_API_KEY_MUMBAI);
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -30,9 +32,9 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
-      accounts: {
-        mnemonic: "test test test test test test test test test test test junk", // test test test test test test test test test test test junk
-      }
+      accounts: [{privateKey: `${process.env.MAIN_ACCOUNT_PRIVATE_KEY}`, balance: "100000000000000000000000"},
+        {privateKey: `${process.env.MAIN_ACCOUNT2_PRIVATE_KEY}`, balance: "100000000000000000000000"}
+      ]
     },
     ropsten: {
       url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
@@ -41,6 +43,13 @@ const config: HardhatUserConfig = {
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY_RINKEBY}`,
       accounts: [`0x${process.env.RINKEBY_PRIVATE_KEY}`]
+    },
+    mumbai: {
+      chainId: 80001,
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY_MUMBAI}`,
+      accounts: [`0x${process.env.MUMBAI_PRIVATE_KEY}`],
+      gas: 2100000,
+      gasPrice: 8000000000,
     }
   },
   solidity: {

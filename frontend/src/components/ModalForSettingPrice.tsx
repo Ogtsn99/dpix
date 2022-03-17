@@ -13,7 +13,10 @@ export const ModalForSettingPrice:React.FC<Props> = (props)=> {
 	
 	const sendNewPrice = async () => {
 		console.log("address", dpix.instance?.address, "id", props.picture.id);
-		await dpixNFT.instance?.approve(dpix.instance?.address!, props.picture.id);
+		if(await dpixNFT.instance?.getApproved(props.picture.id) != dpix.instance?.address) {
+			await dpixNFT.instance?.approve(dpix.instance?.address!, props.picture.id);
+		}
+		
 		await dpix.instance?.setPrice(props.picture.id, ethers.utils.parseEther(newPrice));
 		props.onHide();
 	}

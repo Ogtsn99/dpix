@@ -31,6 +31,7 @@ export const DPix: React.FC<Props> = () => {
 			
 			let pictureCount = (await dpixNFT.instance?.tokenCount()!).toNumber();
 			console.log("pictureCount=", pictureCount);
+			console.log(await dpixToken.instance.balanceOf(currentAddress));
 			setPictures(await getPictures(0, pictureCount))
 		};
 		doAsync();
